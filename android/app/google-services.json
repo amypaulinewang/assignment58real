@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "69059626570",
+    "project_id": "assignment52-887a1",
+    "storage_bucket": "assignment52-887a1.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:69059626570:android:bd6cac9c8ff6aa817f08b3",
+        "android_client_info": {
+          "package_name": "com.example.assignment58real"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCZ0DnbCtDC6CQtHttlH5I2kERci9H87PI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
