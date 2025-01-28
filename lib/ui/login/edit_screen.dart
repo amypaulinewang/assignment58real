@@ -117,33 +117,15 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                             if (_formKey.currentState?.validate() ?? false) {
                               // Only proceed if the form is valid
                               AuthenticationViewModel authAccess = Provider.of<AuthenticationViewModel>(context, listen: false);
+                              // Call a method to create an account here (e.g., signUp)
+                              // bool accountCreated = await authAccess.createAccount(name, email, password);
 
-                              // Call a method to create an account (assuming createAccount is the method)
-                              bool accountCreated = await authAccess.createAccount(name, email, password);
-
-                              if (accountCreated) {
-                                // Show a success message
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text("Account created successfully!"),
-                                    duration: Duration(seconds: 3),
-                                  ),
-                                );
-
-                                // Navigate to the login screen and replace the current screen
-                                Navigator.pushReplacement(
-                                  context,
-                                  MaterialPageRoute(builder: (context) => LoginScreen()),
-                                );
-                              } else {
-                                // If account creation fails
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text("Failed to create account. Please try again."),
-                                    duration: Duration(seconds: 3),
-                                  ),
-                                );
-                              }
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text("Account created successfully!"),
+                                  duration: Duration(seconds: 3),
+                                ),
+                              );
                             } else {
                               // Handle invalid form state
                               ScaffoldMessenger.of(context).showSnackBar(
@@ -155,18 +137,6 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                             }
                           },
                         ),
-                      ),
-                      const SizedBox(height: 20.0),
-                      // Added 'Return to Login' button
-                      TextButton(
-                        onPressed: () {
-                          // Navigate back to the login screen
-                          Navigator.pushReplacement(
-                            context,
-                            MaterialPageRoute(builder: (context) => LoginScreen()),
-                          );
-                        },
-                        child: Text("Return to Login"),
                       ),
                     ],
                   ),

@@ -60,4 +60,13 @@ class AuthenticationViewModel extends BaseViewModel {
   Future<bool> resetPassword(String email) async{
     return await authenticationProvider.resetPassword(email);
   }
+
+  Future<bool> createAccount(String name, String email, String password) async {
+    try {
+    return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
 }
