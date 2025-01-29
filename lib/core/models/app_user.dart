@@ -1,19 +1,39 @@
 import 'package:flutter/material.dart';
 
-@immutable
 class AppUser {
-  late String uid;
-  late String name;
-  late String email;
-  late String password;
+  final String uid;
+  final String name;
+  final String email;
+  final String location;
+  final String password;
 
-  AppUser ({required this.uid, required this.name, required this.email, required this.password});
 
-  AppUser.fromJson(Map<String, dynamic> json) {
+  AppUser({
+    required this.uid,
+    required this.name,
+    required this.email,
+    required this.location,
+    required this.password,
+  });
+
+  factory AppUser.fromJson(Map<String, dynamic> json) {
     print("JSON: $json");
-    uid = json['uid'];
-    name = json['name'];
-    email = json['email'];
-    password = "";
+    return AppUser(
+      uid: json['uid'],
+      name: json['name'],
+      email: json['email'],
+      location: json['location'],
+      password: json['password'] ?? '',
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'uid': uid,
+      'name': name,
+      'email': email,
+      'location': location,
+      'password': password,
+    };
   }
 }

@@ -11,7 +11,7 @@ class AuthenticationProvider{
   AppUser? currentAppUser;
 
   AuthenticationProvider(this.firebaseAuth){
-    authState.listen((user) {
+    firebaseAuth.authStateChanges().listen((user) {
       currentFirebaseUser = user;
     });
   }
@@ -32,51 +32,56 @@ class AuthenticationProvider{
     String? userUid = firebaseAuth.currentUser?.uid;
     print("USER UID: $userUid");
     try {
+      // final url = Uri.https(AppUtils.backendApiUrl, '/app/api/users/$userUid');
       final http.Response response = await http.get(
-        Uri.https(AppUtils.backendApiUrl, '/app/api/users/$userUid'),
-        headers: <String, String>{
+      Uri.https(AppUtils.backendApiUrl, '/app/api/users/$userUid'),
+      headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
         },
       );
       if (response.statusCode != 500) {
         final result = jsonDecode(response.body);
-        return AppUser.fromJson(result['result']);
+        AppUser appUser = AppUser.fromJson(result['result']);
+        setCurrentAppUser(appUser); // Update the currentAppUser
+        return appUser;
+      } else {
+        print(
+            "Failed to fetch user details. Status Code: ${response.statusCode}");
       }
-    }catch(e){
-      print(e.toString());
+    } catch (e) {
+      print("Error fetching user details: $e");
     }
     return null;
   }
 
 
-  Future<AppUser?> createUser({required AppUser currUser}) async {
+  Future<bool> createUser({required AppUser currUser}) async {
     try {
       print("BEFORE...");
-      var url = Uri(scheme: 'http', host: "127.0.0.1", port: 5001, path: "/assignment52-887a1/us-central1/app/apd/users");
+      var url = Uri.https("us-central1-assignment52-887a1.cloudfunctions.net", "app/api/users");
       print ("BRL: $url");
-      // print"URL: #fur.https(appUtils.packendApiurl, '/app/api/users')}")?
-      // var unt2 = Unichttosfunl, toString(l;
       final http.Response response = await http.post(
           url,
           headers: <String, String>{
-            'Content-Type': 'application/json: charset=UTF-8',
+            'Content-Type': 'application/json; charset=UTF-8',
           },
           body: jsonEncode(<String, String>{
             'name': currUser.name,
             'email': currUser.email,
+            'location': currUser.location,
             'password': currUser.password,
-          })
+          }),
       );
-      if(response.statusCode != 500){
+      if(response.statusCode == 200){
         final result = jsonDecode(response.body);
-        return AppUser.fromJson(result['result']);
+        return true;
       }
       else{
-        return null;
+        return false;
       }
     } catch (e) {
       print("error: ${e.toString()}");
-      return null;
+      return false;
     }
   }
 
@@ -93,7 +98,8 @@ class AuthenticationProvider{
             'userUid': newAppUser.uid,
             'name': newAppUser.name,
             'email': newAppUser.email,
-          })
+            'location': newAppUser.location,
+          }),
       );
       if(response.statusCode != 500){
         setCurrentAppUser(newAppUser);
@@ -115,7 +121,7 @@ class AuthenticationProvider{
     print ("DELETEEEEEE: $uid");
     try {
       // var url = Uri.https(AppUtils.backendApiUrl, '/app/api/users/$firebaseUid');
-      var url = Uri(scheme: 'http', host: "127.0.0.1", port: 5001, path: "/assignment52-887a1/us-central1/app/api/users/$uid");
+      var url = Uri.https("us-central1-assignment52-887a1.cloudfunctions.net", "/app/api/users/$uid");
       final http.Response response = await http.delete(
         url,
         headers: <String, String>{

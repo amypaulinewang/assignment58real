@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../core/constants/app_utils.dart';
+import '../../core/models/app_user.dart';
 import '../../core/viewmodels/authentication_view_model.dart';
 
 class CreateAccountScreen extends StatefulWidget {
@@ -16,6 +17,8 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
   late String name = "";
   late String email = "";
   late String password = "";
+  late String location = "";
+
   bool _passwordVisible = false; // Password visibility flag
   final _formKey = GlobalKey<FormState>();
 
@@ -88,26 +91,38 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                       const Text("Password"),
                       const SizedBox(height: 8),
                       TextFormField(
-                        obscureText: !_passwordVisible, // Toggle password visibility
-                        onChanged: (value) {
-                          password = value;
-                        },
-                        validator: _validatePassword, // Password validation
-                        decoration: AppUtils.textFieldDecoration.copyWith(
-                          hintText: "",
-                          suffixIcon: IconButton(
-                            icon: Icon(
-                              _passwordVisible
-                                  ? Icons.visibility
-                                  : Icons.visibility_off,
-                            ),
-                            onPressed: () {
-                              setState(() {
-                                _passwordVisible = !_passwordVisible;
-                              });
-                            },
-                          ),
-                        ),
+                          keyboardType: TextInputType.visiblePassword,
+                          autofillHints: const [AutofillHints.password],
+                          textAlign: TextAlign.left,
+                          onChanged: (value) {
+                            password = value;
+                          },
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Please enter a password';
+                            }
+                            return null;
+                          },
+                          decoration: AppUtils.textFieldDecoration
+                              .copyWith(hintText: "")
+                      ),
+                      const Text("Location"),
+                      const SizedBox(height: 5),
+                      TextFormField(
+                          keyboardType: TextInputType.streetAddress,
+                          autofillHints: const [AutofillHints.location],
+                          textAlign: TextAlign.left,
+                          onChanged: (value) {
+                            location = value;
+                          },
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Please enter a location';
+                            }
+                            return null;
+                          },
+                          decoration: AppUtils.textFieldDecoration
+                              .copyWith(hintText: "")
                       ),
                       const SizedBox(height: 20.0),
                       Center(
@@ -117,11 +132,22 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                             if (_formKey.currentState?.validate() ?? false) {
                               // Only proceed if the form is valid
                               AuthenticationViewModel authAccess = Provider.of<AuthenticationViewModel>(context, listen: false);
-
+                              AppUser newUser = AppUser(
+                                name: name,
+                                email: email,
+                                password: password,
+                                location: location,
+                                uid: '',
+                              );
                               // Call a method to create an account (assuming createAccount is the method)
-                              bool accountCreated = await authAccess.createAccount(name, email, password);
+                              bool accountCreated = await authAccess.createUser(newUser);
 
                               if (accountCreated) {
+                                // Navigate to the login screen and replace the current screen
+                                Navigator.pushReplacement(
+                                  context,
+                                  MaterialPageRoute(builder: (context) => LoginScreen()),
+                                );
                                 // Show a success message
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   const SnackBar(
@@ -130,11 +156,6 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                                   ),
                                 );
 
-                                // Navigate to the login screen and replace the current screen
-                                Navigator.pushReplacement(
-                                  context,
-                                  MaterialPageRoute(builder: (context) => LoginScreen()),
-                                );
                               } else {
                                 // If account creation fails
                                 ScaffoldMessenger.of(context).showSnackBar(

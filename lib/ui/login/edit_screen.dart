@@ -1,151 +1,120 @@
-import 'package:assignment58real/ui/login/login_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:assignment58real/core/viewmodels/authentication_view_model.dart';
+import 'package:assignment58real/core/models/app_user.dart';
 
-import '../../core/constants/app_utils.dart';
-import '../../core/viewmodels/authentication_view_model.dart';
+class EditUserScreen extends StatefulWidget {
+  final AppUser? currentUser;
 
-class CreateAccountScreen extends StatefulWidget {
-  const CreateAccountScreen({super.key});
+  const EditUserScreen({super.key, required this.currentUser});
 
   @override
-  State<CreateAccountScreen> createState() => _CreateAccountScreenState();
+  State<EditUserScreen> createState() => _EditUserScreenState();
 }
 
-class _CreateAccountScreenState extends State<CreateAccountScreen> {
-  late String name = "";
-  late String email = "";
-  late String password = "";
-  bool _passwordVisible = false; // Password visibility flag
-  final _formKey = GlobalKey<FormState>();
+class _EditUserScreenState extends State<EditUserScreen> {
+  late TextEditingController _nameController;
+  late TextEditingController _emailController;
+  late TextEditingController _locationController;
 
-  // Password validation logic
-  String? _validatePassword(String? value) {
-    if (value == null || value.isEmpty) {
-      return 'Please enter a password';
+  bool isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.currentUser == null) {
+      // You can show an error or navigate back to the previous screen if no user is provided.
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("No user data available to edit")),
+        );
+        Navigator.pop(context);  // Go back to the previous screen
+      });
+      return;
     }
-    if (value.length < 6) {
-      return 'Password must be at least 6 characters';
-    }
-    return null;
+    // Initialize the controllers with the current user data
+    _nameController = TextEditingController(text: widget.currentUser?.name);
+    _emailController = TextEditingController(text: widget.currentUser?.email);
+    _locationController = TextEditingController(text: widget.currentUser?.location);
+  }
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _emailController.dispose();
+    _locationController.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    const double logoHeight = 300;
-    double screenHeight = MediaQuery.of(context).size.height;
-    double bottomSectionHeight = screenHeight - logoHeight;
-
     return Scaffold(
-      body: SingleChildScrollView(
-        child: Form(
-          key: _formKey,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 30.0),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: <Widget>[
-                Container(
-                  height: bottomSectionHeight,
-                  padding: EdgeInsets.only(left: 30, top: 60, right: 30, bottom: 40),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      const Text("Name"),
-                      const SizedBox(height: 8),
-                      TextFormField(
-                        keyboardType: TextInputType.name,
-                        autofillHints: const [AutofillHints.name],
-                        textAlign: TextAlign.left,
-                        onChanged: (value) {
-                          name = value;
-                        },
-                        decoration: AppUtils.textFieldDecoration.copyWith(
-                          hintText: "",
-                        ),
-                      ),
-                      const Text("Email"),
-                      const SizedBox(height: 8),
-                      TextFormField(
-                        keyboardType: TextInputType.emailAddress,
-                        autofillHints: const [AutofillHints.email],
-                        textAlign: TextAlign.left,
-                        onChanged: (value) {
-                          email = value;
-                        },
-                        decoration: AppUtils.textFieldDecoration.copyWith(
-                          hintText: "",
-                        ),
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Please enter an email address';
-                          }
-                          return null;
-                        },
-                      ),
-                      const Text("Password"),
-                      const SizedBox(height: 8),
-                      TextFormField(
-                        obscureText: !_passwordVisible, // Toggle password visibility
-                        onChanged: (value) {
-                          password = value;
-                        },
-                        validator: _validatePassword, // Password validation
-                        decoration: AppUtils.textFieldDecoration.copyWith(
-                          hintText: "",
-                          suffixIcon: IconButton(
-                            icon: Icon(
-                              _passwordVisible
-                                  ? Icons.visibility
-                                  : Icons.visibility_off,
-                            ),
-                            onPressed: () {
-                              setState(() {
-                                _passwordVisible = !_passwordVisible;
-                              });
-                            },
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 20.0),
-                      Center(
-                        child: TextButton(
-                          child: Text('Create Account'),
-                          onPressed: () async {
-                            if (_formKey.currentState?.validate() ?? false) {
-                              // Only proceed if the form is valid
-                              AuthenticationViewModel authAccess = Provider.of<AuthenticationViewModel>(context, listen: false);
-                              // Call a method to create an account here (e.g., signUp)
-                              // bool accountCreated = await authAccess.createAccount(name, email, password);
-
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text("Account created successfully!"),
-                                  duration: Duration(seconds: 3),
-                                ),
-                              );
-                            } else {
-                              // Handle invalid form state
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text("Please fix the errors in the form."),
-                                  duration: Duration(seconds: 3),
-                                ),
-                              );
-                            }
-                          },
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
+      appBar: AppBar(title: const Text("Edit User")),
+      body: isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            TextField(
+              controller: _nameController,
+              decoration: const InputDecoration(labelText: 'Name'),
             ),
-          ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: _emailController,
+              decoration: const InputDecoration(labelText: 'Email'),
+              keyboardType: TextInputType.emailAddress,
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: _locationController,
+              decoration: const InputDecoration(labelText: 'Location'),
+            ),
+            const SizedBox(height: 24),
+            ElevatedButton(
+              onPressed: _updateUser,
+              child: const Text("Save Changes"),
+            ),
+          ],
         ),
       ),
     );
+  }
+
+  Future<void> _updateUser() async {
+    setState(() {
+      isLoading = true;
+    });
+
+    // Create an updated user object
+    AppUser updatedUser = AppUser(
+      uid: widget.currentUser!.uid,
+      name: _nameController.text,
+      email: _emailController.text,
+      location: _locationController.text,
+      password: widget.currentUser!.password, // You may want to handle password differently
+    );
+
+    // Call the update method from the view model
+    AuthenticationViewModel authViewModel = Provider.of<AuthenticationViewModel>(context, listen: false);
+    bool success = await authViewModel.updateUser(updatedUser);
+
+    setState(() {
+      isLoading = false;
+    });
+
+    // Display a success or error message
+    if (success) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("User updated successfully")),
+      );
+      Navigator.pop(context); // Go back to Home screen after successful update
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Failed to update user")),
+      );
+    }
   }
 }

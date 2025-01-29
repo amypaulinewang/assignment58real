@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class AppUtils{
-  static const String backendApiUrl = "app-j7vjuzvcsq-uc.a.run.app";
+  static const String backendApiUrl = "us-central1-assignment52-887a1.cloudfunctions.net";
   static var textFieldDecoration = const InputDecoration(
       hintText: 'Enter a value',
       hintStyle: TextStyle(color: Colors.black),

@@ -15,24 +15,42 @@ class AuthenticationViewModel extends BaseViewModel {
     return authenticationProvider.fetchCurrentAppUser();
   }
 
-
   Future<bool> createUser(AppUser currUser) async {
     isLoading = true;
     notifyListeners();
-    AppUser? loggedInAppUser = await authenticationProvider.createUser(
-        currUser: currUser);
-    if (loggedInAppUser == null) {
-      return false;
+
+    // Call createUser, which now returns a boolean (true or false)
+    bool accountCreated =
+    await authenticationProvider.createUser(currUser: currUser);
+
+    if (accountCreated) {
+      // If the account is created, sign in the user
+      await signInUser(currUser.email, currUser.password);
     }
-    signInUser(loggedInAppUser.email, currUser.password);
+
     isLoading = false;
     notifyListeners();
-    return true;
+
+    return accountCreated;
   }
 
   //PUT
   Future<bool> updateUser(AppUser newAppUser) async {
-    return await authenticationProvider.updateUser(newAppUser);
+    isLoading = true;
+    notifyListeners();
+
+    // Update user data in backend
+    bool success = await authenticationProvider.updateUser(newAppUser);
+
+    if (success) {
+      // Update the local currentAppUser after successful backend update
+      authenticationProvider.setCurrentAppUser(newAppUser);
+    }
+
+    isLoading = false;
+    notifyListeners();
+
+    return success;
   }
 
   //DELETE
@@ -60,13 +78,4 @@ class AuthenticationViewModel extends BaseViewModel {
   Future<bool> resetPassword(String email) async{
     return await authenticationProvider.resetPassword(email);
   }
-
-  Future<bool> createAccount(String name, String email, String password) async {
-    try {
-    return true;
-    } catch (e) {
-      return false;
-    }
-  }
-
 }
