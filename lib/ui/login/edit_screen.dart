@@ -110,6 +110,8 @@ class _EditUserScreenState extends State<EditUserScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("User updated successfully")),
       );
+      // After successful update, you can refresh the data from the server
+      await authViewModel.fetchCurrentAppUser();
       Navigator.pop(context); // Go back to Home screen after successful update
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -117,4 +119,5 @@ class _EditUserScreenState extends State<EditUserScreen> {
       );
     }
   }
+
 }

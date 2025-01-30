@@ -39,7 +39,7 @@ class AuthenticationProvider{
           'Content-Type': 'application/json; charset=UTF-8',
         },
       );
-      if (response.statusCode != 500) {
+      if (response.statusCode == 200) {
         final result = jsonDecode(response.body);
         AppUser appUser = AppUser.fromJson(result['result']);
         setCurrentAppUser(appUser); // Update the currentAppUser
@@ -86,33 +86,46 @@ class AuthenticationProvider{
   }
 
   Future<bool> updateUser(AppUser newAppUser) async {
-    print("updating... adults: ${newAppUser.uid}");
+    print("Updating user... UID: ${newAppUser.uid}");
+
     try {
-      var url = Uri.https(AppUtils.backendApiUrl, '/app/api/users');
+      var url = Uri.https(AppUtils.backendApiUrl, '/app/api/users/user');
+
       final http.Response response = await http.put(
-          url,
-          headers: <String, String>{
-            'Content-Type': 'application/json; charset=UTF-8',
-          },
-          body: jsonEncode(<String, String>{
-            'userUid': newAppUser.uid,
-            'name': newAppUser.name,
-            'email': newAppUser.email,
-            'location': newAppUser.location,
-          }),
+        url,
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+        },
+        body: jsonEncode(<String, String>{
+          'userUid': newAppUser.uid,
+          'name': newAppUser.name,
+          'email': newAppUser.email,
+          'location': newAppUser.location,
+        }),
       );
-      if(response.statusCode != 500){
+
+      // Debugging: Log the response body
+      print("Response status code: ${response.statusCode}");
+      print("Response body: ${response.body}");
+
+      // Check if the update was successful (HTTP 200 OK)
+      if (response.statusCode == 200) {
+        // If the backend update is successful, update local state
         setCurrentAppUser(newAppUser);
+        print("User updated successfully!");
         return true;
-      }
-      else{
+      } else {
+        // If not successful, print an error message with the response
+        print("Failed to update user. Status code: ${response.statusCode}");
         return false;
       }
     } catch (e) {
-      print(e.toString());
+      // Log any errors that occur during the request
+      print("Error occurred during user update: $e");
       return false;
     }
   }
+
 
 
   Future<bool> deleteUser() async { //delete firebase and app user
@@ -129,7 +142,7 @@ class AuthenticationProvider{
         },
       );
       if(response.statusCode != 500){
-        final result = jsonDecode(response.body) ;
+        await FirebaseAuth.instance.signOut();
         return true;
       }
       else{
